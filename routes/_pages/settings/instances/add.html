@@ -17,7 +17,7 @@
 
     <label for="instanceInput">Instance:</label>
     <input class="new-instance-input" type="text" id="instanceInput"
-           bind:value='$instanceNameInSearch' placeholder='' required
+           bind:value='$instanceNameInSearch' value="mstdn.kemono-friends.info" placeholder='' required
     >
     <button class="primary" type="submit" id="submitButton"
             disabled="{{!$instanceNameInSearch || $logInToInstanceLoading}}">
