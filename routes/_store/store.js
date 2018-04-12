@@ -25,7 +25,7 @@ class PinaforeStore extends LocalStorageStore {
 }
 
 export const store = new PinaforeStore({
-  instanceNameInSearch: '',
+  instanceNameInSearch: 'mstdn.kemono-friends.info',
   queryInSearch: '',
   currentInstance: null,
   loggedInInstances: {},
