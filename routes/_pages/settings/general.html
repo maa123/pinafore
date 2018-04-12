@@ -1,22 +1,22 @@
 <SettingsLayout page='settings/general' label="General">
-  <h1>General Settings</h1>
+  <h1>設定</h1>
 
-  <h2>UI Settings</h2>
+  <h2>UIの設定</h2>
   <form class="ui-settings" aria-label="UI settings">
     <div class="setting-group">
       <input type="checkbox" id="choice-autoplay-gif"
              bind:checked="$autoplayGifs" on:change="store.save()">
-      <label for="choice-autoplay-gif">Autoplay GIFs</label>
+      <label for="choice-autoplay-gif">GIFの自動再生</label>
     </div>
     <div class="setting-group">
       <input type="checkbox" id="choice-mark-media-sensitive"
              bind:checked="$markMediaAsSensitive" on:change="store.save()">
-      <label for="choice-mark-media-sensitive">Always mark media as sensitive</label>
+      <label for="choice-mark-media-sensitive">メディアを常に閲覧注意としてマークする</label>
     </div>
     <div class="setting-group">
       <input type="checkbox" id="choice-reduce-motion"
              bind:checked="$reduceMotion" on:change="store.save()">
-      <label for="choice-reduce-motion">Reduce motion in UI animations</label>
+      <label for="choice-reduce-motion">アニメーションの動きを減らす</label>
     </div>
   </form>
 
