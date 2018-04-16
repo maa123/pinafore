@@ -23,14 +23,17 @@
       {{numFollowersDisplay}}
     </span>
   </div>
-  <div class="account-profile-more-options">
-    <IconButton
-      label="More options"
-      href="#fa-bars"
-      muted="true"
-      on:click="onMoreOptionsClick()"
-    />
-  </div>
+  <!-- TODO: re-enable this when we support profile editing -->
+  {{#if account && verifyCredentials && account.id !== verifyCredentials.id}}
+    <div class="account-profile-more-options">
+      <IconButton
+        label="More options"
+        href="#fa-bars"
+        muted="true"
+        on:click="onMoreOptionsClick()"
+      />
+    </div>
+  {{/if}}
 </div>
 <style>
   .account-profile-details {
@@ -94,6 +97,12 @@
       text-align: center;
     }
   }
+
+  @media (max-width: 767px) {
+    .account-profile-details-item {
+      font-size: 1em;
+    }
+  }
 </style>
 <script>
   import IconButton from '../IconButton.html'
@@ -113,8 +122,10 @@
     methods: {
       async onMoreOptionsClick() {
         let account = this.get('account')
+        let relationship = this.get('relationship')
+        let verifyCredentials = this.get('verifyCredentials')
         let dialogs = await importDialogs()
-        dialogs.showAccountProfileOptionsDialog(account)
+        dialogs.showAccountProfileOptionsDialog(account, relationship, verifyCredentials)
       }
     },
     components: {

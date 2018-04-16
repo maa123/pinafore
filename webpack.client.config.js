@@ -2,6 +2,7 @@ const webpack = require('webpack')
 const config = require('sapper/webpack/config.js')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
+const UglifyWebpackPlugin = require('uglifyjs-webpack-plugin')
 
 const isDev = config.dev
 
@@ -27,14 +28,7 @@ module.exports = {
           }
         }
       },
-      isDev && {
-        test: /\.css$/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader' }
-        ]
-      },
-      !isDev && {
+      {
         test: /\.css$/,
         use: [
           { loader: 'style-loader' },
@@ -46,13 +40,30 @@ module.exports = {
   node: {
     setImmediate: false
   },
+  optimization: {
+    minimizer: isDev ? [] : [new UglifyWebpackPlugin({
+      cache: true,
+      parallel: true,
+      sourceMap: true,
+      uglifyOptions: {
+        ecma: 6,
+        mangle: true,
+        compress: true,
+        output: {
+          comments: false
+        }
+      }
+    })]
+  },
   plugins: [
     new LodashModuleReplacementPlugin({
       collections: true,
       caching: true
     })
   ].concat(isDev ? [
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin({
+      requestTimeout: 120000
+    })
   ] : [
     new webpack.DefinePlugin({
       'process.browser': true,
@@ -69,5 +80,5 @@ module.exports = {
       logLevel: 'silent' // do not bother Webpacker, who runs with --json and parses stdout
     })
   ]),
-  devtool: isDev ? 'cheap-module-eval-source-map' : 'source-map'
+  devtool: isDev ? 'cheap-module-source-map' : 'source-map'
 }

@@ -5,7 +5,7 @@
          aria-posinset="{{index}}"
          aria-setsize="{{length}}"
          aria-label="{{ariaLabel}}"
-         on:recalculateHeight >
+         on:recalculateHeight>
   {{#if showHeader}}
     <StatusHeader :notification :notificationId :status :statusId :timelineType
                   :account :accountId :uuid :isStatusInNotification />
@@ -23,11 +23,11 @@
                    :originalStatus :uuid :spoilerShown
                    on:recalculateHeight />
   {{/if}}
-  {{#if !spoilerText || spoilerShown}}
+  {{#if showContent || contentPreloaded}}
     <StatusContent :isStatusInOwnThread :isStatusInNotification
-                   :originalStatus :uuid />
+                   :originalStatus :uuid shown="{{showContent}}"/>
   {{/if}}
-  {{#if originalStatus.media_attachments && originalStatus.media_attachments.length}}
+  {{#if showMedia }}
     <StatusMediaAttachments :originalStatus :uuid
                             on:recalculateHeight />
   {{/if}}
@@ -114,6 +114,7 @@
   import { registerClickDelegate, unregisterClickDelegate } from '../../_utils/delegate'
   import { classname } from '../../_utils/classname'
   import { checkDomAncestors } from '../../_utils/checkDomAncestors'
+  import { scheduleIdleTask } from '../../_utils/scheduleIdleTask'
 
   const INPUT_TAGS = new Set(['a', 'button', 'input', 'textarea'])
   const isUserInputElement = node => INPUT_TAGS.has(node.localName)
@@ -126,6 +127,13 @@
       if (!this.get('isStatusInOwnThread')) {
         // the whole <article> is clickable in this case
         registerClickDelegate(delegateKey, (e) => this.onClickOrKeydown(e))
+      }
+      if (!this.get('showContent')) {
+        scheduleIdleTask(() => {
+          // Perf optimization: lazily load the StatusContent when the user is idle so that
+          // it's fast when they click the "show more" button
+          this.set({contentPreloaded: true})
+        })
       }
     },
     ondestroy() {
@@ -198,6 +206,11 @@
       },
       spoilerShown: ($spoilersShown, uuid) => !!$spoilersShown[uuid],
       replyShown: ($repliesShown, uuid) => !!$repliesShown[uuid],
+      showMedia: (originalStatus, isStatusInNotification) => {
+        return !isStatusInNotification
+          && originalStatus.media_attachments
+          && originalStatus.media_attachments.length
+      },
       ariaLabel: (originalAccount, originalStatus, visibility) => {
         return (visibility === 'direct' ? 'Direct message' : 'Status') +
           ` by ${originalAccount.display_name || originalAccount.username}`
@@ -214,7 +227,8 @@
           timelineType !== 'search' && 'status-in-timeline',
           isStatusInOwnThread && 'status-in-own-thread'
         )
-      }
+      },
+      showContent: (spoilerText, spoilerShown) => !spoilerText || spoilerShown
     }
   }
 </script>

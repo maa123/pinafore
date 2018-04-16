@@ -60,7 +60,15 @@
   }
 
   .compose-box-button-wrapper {
-    width: 100%;
+    /*
+     * We want pointer-events only for the sticky button, so use fit-content so that
+     * the element doesn't take up the full width, and then set its left margin to
+     * auto so that it sticks to the right. fit-content doesn't work in Edge, but
+     * that just means that content that is level with the button is not clickable.
+     */
+    width: -moz-fit-content;
+    width: fit-content;
+    margin-left: auto;
     display: flex;
     justify-content: flex-end;
   }
@@ -86,7 +94,7 @@
       width: 560px;
       max-width: calc(100vw - 40px);
     }
-    .compose-box-button-wrapper {
+    .compose-box-button-wrapper.compose-button-sticky {
       top: 5px;
     }
   }
@@ -202,6 +210,7 @@
         let inReplyTo = (realm === 'home' || realm === 'dialog') ? null : realm
         let overLimit = this.get('overLimit')
         let mediaDescriptions = this.get('mediaDescriptions')
+        let inReplyToUuid = this.get('inReplyToUuid')
 
         if (!text || overLimit) {
           return // do nothing if invalid
@@ -209,7 +218,8 @@
 
         /* no await */
         postStatus(realm, text, inReplyTo, mediaIds,
-          sensitive, contentWarning, postPrivacyKey, mediaDescriptions)
+          sensitive, contentWarning, postPrivacyKey,
+          mediaDescriptions, inReplyToUuid)
       },
       setupStickyObserver() {
         this.__stickyObserver = new IntersectionObserver(entries => {

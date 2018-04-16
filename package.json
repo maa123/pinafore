@@ -1,17 +1,18 @@
 {
   "name": "pinafore",
   "description": "Alternative web client for Mastodon",
-  "version": "0.1.4",
+  "version": "0.2.1",
   "scripts": {
     "lint": "standard",
-    "dev": "run-s build-svg serve-dev",
+    "dev": "run-s build-svg build-inline-script serve-dev",
     "serve-dev": "run-p --race build-sass-watch serve",
     "serve": "node server.js",
-    "build": "cross-env NODE_ENV=production run-s globalize-css build-sass build-svg sapper-build deglobalize-css",
+    "build": "cross-env NODE_ENV=production run-s globalize-css build-sass build-svg build-inline-script sapper-build deglobalize-css",
     "sapper-build": "cross-env NODE_ENV=production sapper build",
     "start": "cross-env NODE_ENV=production node server.js",
     "build-and-start": "run-s build start",
     "build-svg": "node ./bin/build-svg.js",
+    "build-inline-script": "node ./bin/build-inline-script.js",
     "build-sass": "node ./bin/build-sass.js",
     "build-sass-watch": "node ./bin/build-sass.js --watch",
     "run-mastodon": "node -r esm ./bin/run-mastodon",
@@ -27,7 +28,7 @@
     "deploy-dev": "npm run stage-dev && now && sleep 60 && now alias dev.pinafore.social && now rm pinafore --safe --yes",
     "stage-prod": "rm -f assets/robots.txt",
     "deploy-prod": "npm run stage-prod && now && sleep 60 && now alias pinafore.social && now rm pinafore --safe --yes",
-    "deploy-dev-travis": "if [ $TRAVIS_BRANCH = master ]; then npm run stage-dev && now --token $NOW_TOKEN --team nolanlawson && sleep 60 && now alias dev.pinafore.social --token $NOW_TOKEN --team nolanlawson && now rm pinafore --safe --yes --token $NOW_TOKEN --team nolanlawson; fi",
+    "deploy-dev-travis": "if [ $TRAVIS_BRANCH = master -a $TRAVIS_PULL_REQUEST = false ]; then npm run stage-dev && now --token $NOW_TOKEN --team nolanlawson && sleep 60 && now alias dev.pinafore.social --token $NOW_TOKEN --team nolanlawson && now rm pinafore --safe --yes --token $NOW_TOKEN --team nolanlawson; fi",
     "backup-mastodon-data": "pg_dump -Fc mastodon_development > fixtures/dump.sql && cd mastodon/public/system && tar -czf ../../../fixtures/system.tgz ."
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "compression": "^1.7.1",
     "cross-env": "^5.1.3",
     "css-loader": "^0.28.7",
+    "escape-html": "^1.0.3",
     "esm": "^3.0.12",
     "events": "^2.0.0",
     "express": "^4.16.2",
@@ -47,14 +49,14 @@
     "font-awesome-svg-png": "^1.2.2",
     "form-data": "^2.3.2",
     "glob": "^7.1.2",
-    "idb-keyval": "^2.3.0",
+    "helmet": "^3.12.0",
     "indexeddb-getall-shim": "^1.3.1",
     "intersection-observer": "^0.5.0",
     "lodash": "^4.17.5",
     "lodash-es": "^4.17.8",
     "lodash-webpack-plugin": "^0.11.4",
     "mkdirp": "^0.5.1",
-    "node-fetch": "^1.7.3",
+    "node-fetch": "^2.1.2",
     "node-sass": "^4.7.2",
     "npm-run-all": "^4.1.2",
     "p-any": "^1.1.0",
@@ -62,25 +64,25 @@
     "pify": "^3.0.0",
     "quick-lru": "^1.1.0",
     "requestidlecallback": "^0.3.0",
-    "sapper": "github:nolanlawson/sapper#monkey-patches",
+    "sapper": "github:nolanlawson/sapper#for-pinafore",
     "serve-static": "^1.13.1",
-    "stringz": "^0.4.0",
-    "style-loader": "^0.19.1",
+    "stringz": "^1.0.0",
+    "style-loader": "^0.20.3",
     "svelte": "^1.57.4",
-    "svelte-extras": "^1.6.0",
+    "svelte-extras": "^2.0.0",
     "svelte-loader": "^2.3.3",
     "svelte-transitions": "^1.1.1",
     "svgo": "^1.0.3",
     "timeago.js": "^3.0.2",
     "tiny-queue": "^0.2.1",
+    "uglifyjs-webpack-plugin": "^1.2.4",
     "web-animations-js": "^2.3.1",
-    "webpack": "^4.1.0",
+    "webpack": "^4.5.0",
     "webpack-bundle-analyzer": "^2.11.1",
-    "workerize-loader": "^1.0.1",
-    "yargs": "^10.1.1"
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
-    "now": "^10.2.2",
+    "now": "^11.1.4",
     "standard": "^10.0.3",
     "testcafe": "^0.19.0"
   },
@@ -140,8 +142,15 @@
       "package.json",
       "package-lock.json",
       "server.js",
+      "inline-script.js",
       "webpack.client.config.js",
       "webpack.server.config.js"
+    ]
+  },
+  "greenkeeper": {
+    "ignore": [
+      "sapper",
+      "standard"
     ]
   }
 }
